@@ -1,122 +1,38 @@
-import glob
-import re
-from audioop import tostereo
-from xml.etree.ElementTree import tostring
-from builtins import AttributeError
+import rsa
+
+#pubkey, privkey = rsa.newkeys(2256)
+#print(pubkey)
+#print(privkey)
+
+privkey = '8998711316272687907363775437682101961027944458420401445319235085108494247129363168977946802220993006869909851405051207834970398099763810147230597968682146066033148512153550671492623071802156996856648412197469382024371057278171988370696924083028653080260758055940527740211453214456487442300027203795968127321166532160483157251650984753017446609096860903804401449135528638398263356235448965755519736665559628762641143947687548418950286223470177246396643415010318052810897031860195029793105717975932559069283413519731807700086662046685863012863779116628007570019645855844057955986993035556471840384853721772984312614379113503731246567953525715331349040754971639098271455026130943793, 65537, 341757975894574365647320400146341025390215508140567606045433512776523828998962188192717237449502595390378040193282763268096515264206663769419670695089031563214008981899540528576912870984567019625191844270557109600052787914695058959895397165611155797744312782111417573971745839003649804597170570978960963561078222966376781142722823451856156730642078618238192166247779382615218687252477297273735045481932848053073601344207045628232526426226208740364049106278629337918795333632203237272977479268517590777758576070941960460282175465148288488362678886815259300266696680904235583974258449997819344224724715939095754720650772383213876379157111138437495039555707409723362290392663795413, 3002269479156482910197249478577897184714825254048298859308987984057723021770180746060504292444572167973760151701705548801514781609504505753641851319013481998371166984971616852254265963653669541443682953934205206432505014658799327755989089575572074132469395358959905153470733014685183471222528008569371177289880758405872176469201693987062548254041563565160510211, 2997302999862945084818042656382293679764644539153087447113061659164205155847192952453843512441525647306681080102592356783194182691392526285551606521816245833590864014309348021452674692040695381774305664630879572704090879238274802488464670865139641062577971385685747184909258544386681306684910779114532460335227942245563'
+pubkey = '8998711316272687907363775437682101961027944458420401445319235085108494247129363168977946802220993006869909851405051207834970398099763810147230597968682146066033148512153550671492623071802156996856648412197469382024371057278171988370696924083028653080260758055940527740211453214456487442300027203795968127321166532160483157251650984753017446609096860903804401449135528638398263356235448965755519736665559628762641143947687548418950286223470177246396643415010318052810897031860195029793105717975932559069283413519731807700086662046685863012863779116628007570019645855844057955986993035556471840384853721772984312614379113503731246567953525715331349040754971639098271455026130943793, 65537'
+f = open('key.txt', 'w', encoding='utf8')
+f.write(str(pubkey) + ' \n' + str(privkey) + ' \n')
+f.close()
+
+                
+
+words = {'best','my words lol dsdjahdagts'}
+print(words)
+
+enwords = set()
+dewords = set()
 
 
-def PASSWORD():
-    passwords = set()
-    dir_path = r'D:\Logi\@REDLINEVIP MISS LOGS 44K\**\Passwords.txt'
-    for file in glob.glob(dir_path, recursive=True):
-        # print(file)
-        word_search = 'Password:'
-        with open(file, encoding="utf8") as file:
-            for line in file:
-                if line.find(word_search):
-                    continue
-                else:
-                    s = line
-                    passwords.add(s.replace('Password: ', ''))
-    f = open('passwords.txt', 'w', encoding="utf8")
-    f.writelines(passwords)
-    f.close()
+for word in words:
+   enctex = rsa.encrypt(word.encode('utf-8'), pubkey)
+   enwords.add(enctex)
+print(enwords)
+
+for word in enwords:
+    dectex = rsa.decrypt(word, privkey).decode('utf8')
+    dewords.add(dectex)
+print(dewords)
 
 
-def passVault(addressDir):
-    passwords = list()
-    word_search = 'Password:'
-    file = addressDir + 'Passwords.txt'
-    with open(file, encoding="utf8") as file:
-        for line in file:
-            if line.find(word_search):
-                continue
-            else:
-                s = line
-                # print(s.replace('Password: ',''))
-                passwords.append(s.replace('Password: ', ''))
-    return passwords
 
 
-def SID(vault):
-    result = re.search(r'''salt.*?=''', vault)
-    salt = result.group(0).replace('salt":"', '')
-    result = re.search(r'''iv.*?==''', vault)
-    iv = result.group(0).replace('iv":"', '')
-    result = re.search(r'''data":".*?"''', vault)
-    data = result.group(0).replace('data":"', '')
-    data = data.replace('"', '')
-    return salt, iv, data
+    
 
 
-def HashCat(salt, iv, data):
-    return '$metamask$' + salt + '$' + iv + '$' + data
-
-
-def sysfile(file):
-    addressFile = str(file)
-    result = re.search(r'''[A-Z]{2}.+?\] \[.+?\]''', addressFile)
-    name = result.group(0)
-    result = re.sub(r'''Wallets.*?log''', '', addressFile)
-    addressDir = result
-    try:
-        passwords = passVault(addressDir)
-    except:
-        print("нет паролей в папке " + addressDir)
-        passwords = ['НЕТ ПАРОЛЕЙ']
-    return addressDir, name, passwords
-
-
-def getVault(file):
-    with open(file, 'r', encoding="ANSI") as file:
-        text = file.read()
-        result = re.search(r'''{\\"data\\":\\".+?\\"}''', text)
-        vault = result.group(0).replace('\\', '')
-    return vault
-
-
-def WriteFullVaults(FullVaults):
-    f = open('FullVaults.txt', 'w', encoding="utf8")
-    f.writelines(FullVaults)
-    f.close()
-
-
-def WriteVaults(vaults, iv):
-    nameFile = str(iv) + '.log'
-    f = open(nameFile, 'w', encoding="utf8")
-    f.writelines(vaults)
-    f.close()
-
-
-def VAULET():
-    FullVaults = set()
-    dir_path = r'D:\Logi\@REDLINEVIP MISS LOGS 44K\**\*.log'
-
-    for file in glob.glob(dir_path, recursive=True):
-
-        addressDir, name, passwords = sysfile(file)
-        try:
-            vault = getVault(file)
-            salt, iv, data = SID(vault)
-            hashcat = HashCat(salt, iv, data)
-            FullVaults.add(hashcat+ '\n')
-            passwords.sort()
-            vaults = list()
-            vaults.append(name + '\n\n' + addressDir + '\n\n' + str(file) + '\n\n' + vault + '\n\n' +
-                          hashcat + '\n\n' + ' Все пароли с учётом повторения для HASHCAT ' +
-                          '\n\n')
-            vaults = [*vaults, *passwords]
-            WriteVaults(vaults, iv)
-        except:
-            print('нет Vaulet')
-        # break
-
-    WriteFullVaults(FullVaults)
-
-
-if __name__ == "__main__":
-    PASSWORD()
-    VAULET()
-    print('end')
-
-
+    
