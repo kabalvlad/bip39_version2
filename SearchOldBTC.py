@@ -4,15 +4,18 @@ import hashlib
 import binascii
 import ecdsa
 import smtplib
-
+from tqdm import tqdm
 screen_print_after_keys = 5000
 
 ################################################################
 def loadadrs():
     btc_list = set()
-    f = open("Bitcoin_addresses.txt", "r", encoding='utf-8')
-    btc_list.update(f.read().splitlines())
-    print(len(btc_list))
+    for i in tqdm(range(100)):
+        f = open("Bitcoin_addresses.txt", "r", encoding='utf-8')
+        btc_list.update(f.read().splitlines())
+        pass
+    f.close()
+    #print(len(btc_list))
     print("Загрузка завершена")
     return btc_list
 
@@ -94,7 +97,7 @@ def send_email(to_addr, subject, text, encode='utf-8'):
         # пробуем послать письмо
         smtp.sendmail(from_addr, to_addr, body.encode(encode))
     except smtplib.SMTPException as err:
-        print('Что - то пошло не так...')
+        print('Err...')
         raise err
     finally:
         smtp.quit()

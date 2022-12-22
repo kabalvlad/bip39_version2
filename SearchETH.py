@@ -5,6 +5,9 @@ import time
 import smtplib
 import bitcoinlib
 import os
+from tqdm import tqdm
+#import pysqlite2, MySQLdb, psycopg2
+#pyinstaller --onefile SearchETH.py --windowed
 
 
 BIP39_PBKDF2_ROUNDS = 2048
@@ -23,10 +26,12 @@ group_size = 100
 ###############################################################################
 def loadadrs():
     eth_address_list = set()
-    f = open("Eth_addresses.txt", "r", encoding='utf-8')
-    eth_address_list.update(f.read().splitlines())
+    for i in tqdm(range(100)):
+        f = open("Eth_addresses.txt", "r", encoding='utf-8')
+        eth_address_list.update(f.read().splitlines())
+        pass
     f.close()
-    print(len(eth_address_list))
+    #print(len(eth_address_list))
     #print(eth_address_list)
     return eth_address_list
 
@@ -73,7 +78,7 @@ def send_email(to_addr, subject, text, encode='utf-8'):
         # пробуем послать письмо
         smtp.sendmail(from_addr, to_addr, body.encode(encode))
     except smtplib.SMTPException as err:
-        print('Что - то пошло не так...')
+        print('Err...')
         raise err
     finally:
         smtp.quit()
