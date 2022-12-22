@@ -3,11 +3,10 @@ from ecdsa.curves import SECP256k1
 from eth_utils import to_checksum_address, keccak as eth_utils_keccak
 import time
 import smtplib
-import bitcoinlib
 import os
 from tqdm import tqdm
 #import pysqlite2, MySQLdb, psycopg2
-#pyinstaller --onefile SearchETH.py --windowed
+#pyinstaller --onefile SearchETH.py --windowed -w --hiddenimport bitcoinlib
 
 
 BIP39_PBKDF2_ROUNDS = 2048
@@ -101,11 +100,7 @@ def create_valid_mnemonics(strength=128):
     return " ".join(result)
 
 ################################################################
-def entropy_bits_to_mnemonic(entropy_bits):
-    words = bitcoinlib.mnemonic.Mnemonic().generate(entropy_bits)
-# bitcoinlib.keys.HDKey.from_passphrase(Mnemonic().generate(256)).address()  # very slow
-# seed = bitcoinlib.mnemonic.Mnemonic().to_seed(words)                       # hashlib is faster
-    return words
+
 
 ###############################################################################
 def mnemonic_to_bip39seed(mnemonic, passphrase):
