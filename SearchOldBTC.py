@@ -4,18 +4,17 @@ import hashlib
 import binascii
 import ecdsa
 import smtplib
-from tqdm import tqdm
+import mmap
 screen_print_after_keys = 5000
 
 ################################################################
 def loadadrs():
     btc_list = set()
-    for i in tqdm(range(100)):
-        f = open("Bitcoin_addresses.txt", "r", encoding='utf-8')
-        btc_list.update(f.read().splitlines())
-        pass
-    f.close()
+    with open("Bitcoin_addresses.txt", mode="r", encoding="utf8") as fp:
+        with mmap.mmap(fp.fileno(), length=0, access=mmap.ACCESS_READ) as mobj:
+            btc_list.update(mobj.read().splitlines())
     #print(len(btc_list))
+    fp.close()
     print("Загрузка завершена")
     return btc_list
 
@@ -56,10 +55,11 @@ def public_key_to_address(public_key):
 
 ################################################################
 def check_address(addr, btc_list, private_key, public_key):
-    if addr in btc_list:
+    str_object = addr.encode("utf-8")
+    if str_object in btc_list:
         print ('Win')
         f = open("Win.txt", "a")
-        f.writelines(private_key + " " + public_key + " " + addr + "\n")
+        f.writelines('Private Key: '+ private_key + " PubKey: " + public_key + " Address: " + addr + "\n")
         f.close()
         to_addr = "kabalvlad@tut.by"
         subject = "Найдена мнемоника BTC old"
@@ -114,6 +114,7 @@ def generate_mnem_address_pairs():
         private_key = generate_private_key()
         public_key = private_key_to_public_key(private_key)
         address = public_key_to_address(public_key)
+        #address = '111111111111111111168xDACCG'
         if k % screen_print_after_keys == 0:
             print("Address " + address + '\n  {:0.2f} Keys/s    :: Total Key Searched: {}'.format(k/(time.time() - st), k) + " Private Key: " + private_key, end='\n')
 
@@ -125,5 +126,5 @@ def generate_mnem_address_pairs():
 ###############################################################################
 if __name__ == '__main__':
     print('[+] Starting.........Wait.....')
-    print('[+] Load base address BTC.....')
+    print('[+] Load base address BTC..... 3 - 5 min')
     generate_mnem_address_pairs()

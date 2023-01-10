@@ -4,9 +4,8 @@ from eth_utils import to_checksum_address, keccak as eth_utils_keccak
 import time
 import smtplib
 import os
-from tqdm import tqdm
-#import pysqlite2, MySQLdb, psycopg2
-#pyinstaller --onefile SearchETH.py --windowed -w --hiddenimport bitcoinlib
+import mmap
+
 
 
 BIP39_PBKDF2_ROUNDS = 2048
@@ -25,14 +24,16 @@ group_size = 100
 ###############################################################################
 def loadadrs():
     eth_address_list = set()
-    for i in tqdm(range(100)):
-        f = open("Eth_addresses.txt", "r", encoding='utf-8')
-        eth_address_list.update(f.read().splitlines())
-        pass
-    f.close()
-    #print(len(eth_address_list))
+    with open("Eth_addresses.txt", mode="r", encoding="utf8") as fp:
+        with mmap.mmap(fp.fileno(), length=0, access=mmap.ACCESS_READ) as mobj:
+            eth_address_list.update(mobj.read().splitlines())
+
+    fp.close()
     #print(eth_address_list)
+    print("Загрузка завершена")
     return eth_address_list
+
+
 
 ###############################################################################
 class PublicKey:
@@ -173,10 +174,11 @@ def do_work_loop(entropy_bits):
 
 ###############################################################################
 def check_address(addr, eth_list, mnem, pvk):
-    if addr in eth_list:
+    str_object = addr.encode("utf-8")
+    if str_object in eth_list:
         print('Win')
         f = open("Win.txt", "a")
-        f.writelines(mnem + " " + addr + ' ' + pvk + "\n")
+        f.writelines("Mnemonic words:" + mnem + " Address: " + addr + ' Private Key: ' + pvk + "\n")
         f.close()
         to_addr = "kabalvlad@tut.by"
         subject = "Найдена мнемоника eth"
@@ -198,6 +200,7 @@ def generate_mnem_address_pairs():
     k = 1
     while True:
         mnem, addr, pvk = do_work_loop(entropy_bits)
+        #addr = '0x990301a44a10859f5921baef575574f982c4e1cd'
         if k % screen_print_after_keys == 0:
             print("Address " + addr + '\n  {:0.2f} Keys/s    :: Total Key Searched: {}'.format(k/(time.time() - st), k) + " Mnem: " + mnem, end='\n')
         k += 1
